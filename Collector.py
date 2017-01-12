@@ -20,6 +20,7 @@ DEFAULT_ENDPOINT = (("localhost", 10053), )
 DEFAULT_QUERY_TYPE = "json"
 DEFAULT_FILTER = None
 
+
 class JsonMetricsRecord(object):
 
     CONNS_CNT_NAME = "connections"
@@ -44,7 +45,9 @@ class JsonMetricsRecord(object):
         return self._name
 
     def genMeterRecord(self, s, name, default):
-        return self.genMetricsName(self.SUMMARY_NAME, name), s.get(name, default)
+        return \
+            self.genMetricsName(self.SUMMARY_NAME, name), \
+            s.get(name, default)
 
     def getNamedSummary(self, s):
 
@@ -60,33 +63,38 @@ class JsonMetricsRecord(object):
 
         meters = self._record.get(self.METER_SECTION_NAME)
 
-        if meters != None:
+        if meters is not None:
             summary = meters.get(self.SUMMARY_NAME)
-            if summary != None:
-                r.extend( self.getNamedSummary(summary) )
+            if summary is not None:
+                r.extend(self.getNamedSummary(summary))
 
         return r
 
     def getNamedCounters(self):
         r = []
-        r.extend( self.getNamedConnCounters() )
+        r.extend(self.getNamedConnCounters())
         return r
 
     def genMetricsName(self, section, name):
-        return self._sep.join([ self._name, section, name])
+        return self._sep.join([self._name, section, name])
 
-    def genMetricsRecord(self, d, section_name, name, default = 0):
-        return ( self.genMetricsName(section_name, name), d.get(name, default) )
+    def genMetricsRecord(self, d, section_name, name, default=0):
+        return (self.genMetricsName(section_name, name), d.get(name, default))
 
     def getNamedConnCounters(self):
         res = []
         conns = self._record.get(self.CONNS_CNT_NAME)
 
-        if conns == None:
+        if conns is None:
             return []
 
-        res.append( self.genMetricsRecord(conns, self.CONNS_CNT_NAME, self.CONNS_ACC_NAME))
-        res.append( self.genMetricsRecord(conns, self.CONNS_CNT_NAME, self.CONNS_REJ_NAME))
+        res.append(
+            self.genMetricsRecord(
+                conns, self.CONNS_CNT_NAME, self.CONNS_ACC_NAME))
+
+        res.append(
+            self.genMetricsRecord(
+                conns, self.CONNS_CNT_NAME, self.CONNS_REJ_NAME))
 
         return res
 
@@ -136,13 +144,9 @@ class CoxxCollector(object):
         yield c
         yield g
 
-
     def constructMeticsTable(self, met):
         finalResult = []
         for n in met:
-            # print(n.name())
-            # print(str(n.getNamedCounters()))
-            # print(str(n.getNamedMeters()))
             finalResult.extend(n.getNamedCounters())
             finalResult.extend(n.getNamedMeters())
 
